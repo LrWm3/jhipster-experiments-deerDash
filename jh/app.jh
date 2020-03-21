@@ -1,0 +1,175 @@
+////
+// DeerInc Application
+////
+// This is the DeerInc B2B application. It handles all DeerInc B2B offerings.
+////
+
+/**
+ * The application configuration.
+ * @author wmarsman
+ */
+application {
+  config {
+    packageName com.deerinc.cloud
+    baseName deerDash
+    applicationType monolith
+
+    /**
+     * Modified from defaults.
+     */
+    
+    // enableSwaggerCodegen, default: false
+    enableSwaggerCodegen true
+    // websocket, default: false
+    websocket spring-websocket
+    // searchEngine, default: false
+    searchEngine elasticsearch
+    // messageBroker, default: false
+    messageBroker kafka
+    // testFrameworks, default: []
+    testFrameworks [protractor, cucumber, gatling]
+    // skipUserManagement, default: true
+    skipUserManagement false
+
+    /**
+     * Defaults, listed for clarity.
+     */
+
+    // Set to Default Values, listed for clarity
+    dtoSuffix	DTO
+    serverPort 8080
+    clientFramework angularX
+    clientPackageManager npm
+    databaseType sql
+    cacheProvider ehcache
+    devDatabaseType h2Disk
+    enableTranslation true
+    enableHibernateCache true
+  }
+  entities *
+}
+
+/**
+ * Application
+ */
+
+
+/**
+ * Entities
+ */
+
+entity Region {
+	regionName String
+}
+
+entity Country {
+	countryName String
+}
+
+// an ignored comment
+/** not an ignored comment */
+
+/**
+ * Location entity.
+ * @author wmarsman
+ */
+entity Location {
+  /**
+   * The street address for the provided Location.
+   */
+	streetAddress String
+	postalCode String
+	city String
+	stateProvince String
+}
+
+entity Department {
+	departmentName String required
+}
+
+/**
+ * Task entity.
+ * @author The JHipster team.
+ */
+entity Task {
+	title String
+	description String
+}
+
+/**
+ * The Employee entity.
+ */
+entity Employee {
+	/**
+	* The firstname attribute.
+	*/
+	firstName String
+	lastName String
+	email String
+	phoneNumber String
+	hireDate Instant
+	salary Long
+	commissionPct Long
+}
+
+entity Job {
+	jobTitle String
+	minSalary Long
+	maxSalary Long
+}
+
+entity JobHistory {
+	startDate Instant
+	endDate Instant
+	language Language
+}
+
+/**
+ * Enumerations
+ */
+
+enum Language {
+  FRENCH, ENGLISH, SPANISH
+}
+
+/**
+ * Entity Relationships
+ */
+
+relationship OneToOne {
+	Country{region} to Region
+	Location{country} to Country
+	Department{location} to Location
+	JobHistory{job} to Job,
+	JobHistory{department} to Department,
+	JobHistory{employee} to Employee
+}
+
+relationship ManyToMany {
+	Job{task(title)} to Task{job}
+	Employee{manager} to Employee{teamMember}
+}
+
+// defining multiple OneToMany relationships with comments
+relationship OneToMany {
+	Employee to Job{employee}
+	/**
+	* Another side of the same relationship
+	*/
+	Department to Employee{department}
+}
+
+/**
+ * Entity Options 
+ */
+paginate JobHistory, Employee with infinite-scroll
+paginate Job with pagination
+
+// Use Data Transfert Objects (DTO)
+dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl except Employee, Job
+
+// Set an angular suffix
+angularSuffix * with DeerInc
